@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dudhbhate Netralay — WhatsApp Review Sender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16231C; --ink-soft:#4A5A50;
+    --paper:#EFF3EF; --panel:#FFFFFF;
+    --forest:#12513A; --forest-deep:#0C3A29; --forest-soft:#DCEAE1;
+    --amber:#C98A2C; --amber-deep:#A66F1E;
+    --line:#D7DED9;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Work Sans',sans-serif; line-height:1.5;
+  }
+  .shell{ max-width:520px; margin:0 auto; padding:clamp(20px,5vw,40px) clamp(16px,4vw,28px) 60px; }
+  .brand{ font-size:13px; color:var(--ink-soft); margin-bottom:20px; }
+  .brand strong{ color:var(--forest-deep); font-weight:600; }
+  .iris{ width:52px; height:52px; margin-bottom:14px; }
+  h1{
+    font-family:'Fraunces',serif; font-weight:560; font-size:30px;
+    color:var(--forest-deep); margin:0 0 8px;
+  }
+  .subhead{ font-size:14.5px; color:var(--ink-soft); margin:0 0 26px; max-width:44ch; }
+  .panel{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:16px; padding:clamp(18px,4vw,26px);
+  }
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block; font-size:13px; font-weight:600;
+    color:var(--forest-deep); margin-bottom:6px;
+  }
+  select, input[type=text], input[type=tel], textarea{
+    width:100%; font-family:'Work Sans',sans-serif; font-size:15px;
+    color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    border-radius:10px; padding:11px 12px;
+  }
+  textarea{ min-height:100px; resize:vertical; }
+  select:focus, input:focus, textarea:focus{ outline:2px solid var(--amber); outline-offset:1px; }
+  .row-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:440px){ .row-2{ grid-template-columns:1fr; } }
+  .preview{
+    background:var(--forest-soft); border-radius:12px; padding:14px;
+    font-size:14px; color:var(--forest-deep); white-space:pre-wrap;
+    margin-top:6px;
+  }
+  .btn{
+    width:100%; font-family:'Work Sans',sans-serif; font-size:15px; font-weight:600;
+    border-radius:10px; padding:13px 18px; border:none; cursor:pointer;
+    background:var(--forest); color:#fff; margin-top:8px;
+  }
+  .btn:hover{ background:var(--forest-deep); }
+  .btn:disabled{ opacity:.5; cursor:default; }
+  .field-hint{ font-size:12px; color:var(--ink-soft); margin-top:5px; }
+  .status{ font-size:13px; color:var(--ink-soft); margin-top:10px; min-height:16px; }
+  .status.err{ color:#A5412C; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="brand"><strong>Dr Dudhbhate Netralay &amp; Retina Centre</strong><br>WhatsApp review sender — staff use only</div>
+
+  <svg class="iris" viewBox="0 0 64 64" fill="none">
+    <circle cx="32" cy="32" r="30" stroke="#12513A" stroke-width="2.4"/>
+    <circle cx="32" cy="32" r="20" fill="#DCEAE1" stroke="#12513A" stroke-width="1.4"/>
+    <circle cx="32" cy="32" r="9" fill="#12513A"/>
+    <circle cx="35.5" cy="28.5" r="2.6" fill="#EFF3EF"/>
+  </svg>
+  <h1>Send a review request</h1>
+  <p class="subhead">Fill in the patient's details, check the message, and open WhatsApp with it ready to send.</p>
+
+  <div class="panel">
+    <div class="row-2">
+      <div class="field">
+        <label for="nameInp">Patient's name</label>
+        <input type="text" id="nameInp" placeholder="e.g. Mrs. Kulkarni">
+      </div>
+      <div class="field">
+        <label for="phoneInp">WhatsApp number</label>
+        <input type="tel" id="phoneInp" placeholder="98xxxxxxxx">
+      </div>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label for="branchSel">Branch</label>
+        <select id="branchSel"></select>
+      </div>
+      <div class="field">
+        <label for="serviceSel">Service</label>
+        <select id="serviceSel"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Message preview</label>
+      <div class="preview" id="preview"></div>
+      <div class="field-hint">Edit the wording in the code's MESSAGE_TEMPLATE if you'd like to change it.</div>
+    </div>
+
+    <button class="btn" id="sendBtn" onclick="openWhatsApp()">Open WhatsApp with this message</button>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- CONFIG — edit before using ---------- */
+const CONFIG = {
+  hospitalName: "Dr Dudhbhate Netralay & Retina Centre",
+  branches: [
+    { id: "sinhgad", label: "Sinhgad Road, Manik Baug" }
+    // add more branches here as { id: "...", label: "..." }
+  ],
+  services: [
+    "Cataract Surgery","Retina Treatment / Surgery","LASIK / Refractive Surgery",
+    "Glaucoma Care","Diabetic Retinopathy Care","General Eye Check-up",
+    "Squint / Pediatric Eye Care","DCR Surgery"
+  ],
+  // This is NOT your Google review link — same hosted tool address as the poster.
+  toolUrl: "https://REPLACE-WITH-YOUR-HOSTED-URL/dudhbhate-review-assistant.html"
+};
+
+// Edit this wording to match how the clinic actually talks to patients.
+function MESSAGE_TEMPLATE(name, branch, service){
+  const greeting = name ? `Hi ${name},` : "Hi,";
+  return `${greeting} thank you for visiting ${CONFIG.hospitalName} (${branch}) today for your ${service.toLowerCase()}. We'd love to hear how it went — it takes less than a minute: ${CONFIG.toolUrl}`;
+}
+
+function fillSelect(sel, items, isBranch){
+  sel.innerHTML = "";
+  items.forEach(it=>{
+    const opt = document.createElement("option");
+    if(isBranch){ opt.value = it.id; opt.textContent = it.label; }
+    else { opt.value = it; opt.textContent = it; }
+    sel.appendChild(opt);
+  });
+}
+fillSelect(document.getElementById("branchSel"), CONFIG.branches, true);
+fillSelect(document.getElementById("serviceSel"), CONFIG.services, false);
+
+function branchLabel(id){
+  const b = CONFIG.branches.find(x=>x.id===id);
+  return b ? b.label : id;
+}
+
+function updatePreview(){
+  const name = document.getElementById("nameInp").value.trim();
+  const branch = branchLabel(document.getElementById("branchSel").value);
+  const service = document.getElementById("serviceSel").value;
+  document.getElementById("preview").textContent = MESSAGE_TEMPLATE(name, branch, service);
+}
+["nameInp","branchSel","serviceSel"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", updatePreview);
+  document.getElementById(id).addEventListener("change", updatePreview);
+});
+updatePreview();
+
+function normalizePhone(raw){
+  let digits = raw.replace(/\D/g, "");
+  if(digits.length === 10){ digits = "91" + digits; }          // bare 10-digit Indian number
+  if(digits.length === 11 && digits.startsWith("0")){ digits = "91" + digits.slice(1); } // leading 0
+  return digits;
+}
+
+function openWhatsApp(){
+  const statusEl = document.getElementById("status");
+  const phoneRaw = document.getElementById("phoneInp").value.trim();
+  const phone = normalizePhone(phoneRaw);
+
+  if(phone.length < 12){
+    statusEl.textContent = "Enter a valid 10-digit WhatsApp number.";
+    statusEl.className = "status err";
+    return;
+  }
+  if(CONFIG.toolUrl.includes("REPLACE-WITH")){
+    statusEl.textContent = "Set CONFIG.reviewUrl in the code before sending.";
+    statusEl.className = "status err";
+    return;
+  }
+
+  const message = document.getElementById("preview").textContent;
+  const url = "https://api.whatsapp.com/send?phone=" + phone + "&text=" + encodeURIComponent(message);
+  window.open(url, "_blank");
+  statusEl.textContent = "";
+}
+</script>
+</body>
+</html>
